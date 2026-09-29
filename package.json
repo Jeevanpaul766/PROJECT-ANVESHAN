@@ -1,0 +1,43 @@
+{
+  "name": "project-anveshan",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Project Anveshan — open Deep Research OS for long-horizon, sourced investigation.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "concurrently -k -n api,web -c cyan,magenta \"tsx src/server/index.ts\" \"npm run dev:web\"",
+    "dev:api": "tsx src/server/index.ts",
+    "dev:web": "npm --prefix web run dev",
+    "build:web": "npm --prefix web run build",
+    "start": "tsx src/server/index.ts",
+    "research": "tsx src/cli.ts",
+    "test": "node --import tsx/esm --test src/tests/quality.test.ts src/tests/dedup.test.ts src/tests/citations.test.ts src/tests/gapDetector.test.ts src/tests/loop.test.ts",
+
+    "probe:llm": "tsx src/scripts/probe-llm.ts",
+    "probe:search": "tsx src/scripts/probe-search.ts",
+    "probe:store": "tsx src/scripts/probe-store.ts",
+    "probe:orchestrator": "tsx src/scripts/probe-orchestrator.ts",
+    "probe:search-agent": "tsx src/scripts/probe-search-agent.ts",
+    "probe:critic": "tsx src/scripts/probe-critic.ts",
+    "probe:synthesizer": "tsx src/scripts/probe-synthesizer.ts",
+    "probe:loop": "tsx src/scripts/probe-loop.ts",
+    "probe:api": "tsx src/scripts/probe-api.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "concurrently": "^9.2.4",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "tsx": "^4.19.3"
+  }
+}
