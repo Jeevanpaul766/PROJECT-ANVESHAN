@@ -155,8 +155,8 @@ export async function critiqueFindings(
     ? `WARNING: ${dominantPercent}% of sources are from ${dominantKind[0]}. Need more diversity.`
     : null;
 
-  // Phase 4: Quantitative depth check
-  const numericPattern = /\d+\.?\d*\s*(S\/?cm|mS|eV|°C|cycles?|mAh|Wh|kWh|GPa|MPa|%|nm|μm|mm)/i;
+  // Phase 4: Quantitative depth check — domain-agnostic numeric detection
+  const numericPattern = /\d+\.?\d*\s*(?:×\s*10\^?\d+\s*)?(?:%|°[CF]|[kKMGT]?(?:Hz|W|Wh|J|Pa|N|m|g|L|mol|s|A|V|Ω|S|b|B|eV|cal|bar)|(?:nm|μm|mm|cm|km|mg|kg|mL|dB|pp[mbth]|fps|rpm|USD|EUR|\$|¥|£|cycles?|mAh|Ah|mS|kWh|GWh|MPa|GPa|kPa|FLOPS?|tokens?))/i;
   const claimsWithNumbers = claims.filter((c) => numericPattern.test(c.statement) || numericPattern.test(c.evidence));
   const quantitativePercent = claims.length > 0
     ? Math.round((claimsWithNumbers.length / claims.length) * 100)

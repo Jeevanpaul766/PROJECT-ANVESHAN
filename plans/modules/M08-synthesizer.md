@@ -1,6 +1,6 @@
 # M08 — Synthesizer agent
 
-**Status:** Not started  
+**Status:** Done  
 **Goal:** Write a multi-section Markdown report with citations from stored findings only.  
 **Depends on:** M02, M04  
 **Unblocks:** M09
@@ -48,9 +48,9 @@ The synthesizer **must not** cite URLs that are not in `findings`.
 
 ## Acceptance checks
 
-- [ ] Offline report contains `## Sources` and at least as many listed URLs as findings.
-- [ ] No hallucinated `https://` links that were not in findings (spot-check: parse URLs from report ⊆ finding URLs).
-- [ ] Report is Markdown, UTF-8.
+- [x] Offline report contains `## Sources` and at least as many listed URLs as findings.
+- [x] No hallucinated `https://` links that were not in findings (spot-check: parse URLs from report ⊆ finding URLs).
+- [x] Report is Markdown, UTF-8.
 
 ## Done means
 

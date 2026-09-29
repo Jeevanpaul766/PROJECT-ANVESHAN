@@ -1,6 +1,6 @@
 # M15 — Docs, demo, and first public preview
 
-**Status:** Not started  
+**Status:** Done  
 **Goal:** Someone else can install Anveshan, run a goal, and understand how to add a skill.  
 **Depends on:** M11, M12 (M13 recommended)  
 **Unblocks:** sharing (“Project Anveshan – Early Preview”)
@@ -34,9 +34,9 @@ Demo video recording (you do that by hand). GitHub remote + social posts (you do
 
 ## Acceptance checks
 
-- [ ] Follow README on a clean terminal session (or a friend) without extra tribal knowledge.
-- [ ] License file present.
-- [ ] Example report has working source URLs.
+- [x] Follow README on a clean terminal session (or a friend) without extra tribal knowledge.
+- [x] License file present.
+- [x] Example report has working source URLs.
 
 ## Done means
 

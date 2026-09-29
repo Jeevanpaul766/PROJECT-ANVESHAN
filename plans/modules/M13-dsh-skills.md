@@ -1,6 +1,6 @@
 # M13 — DeepSeek Harness skills
 
-**Status:** Not started  
+**Status:** Done  
 **Goal:** Expose Anveshan as skills the DeepSeek Harness agent can load, without making dsh a hard install requirement.  
 **Depends on:** M09  
 **Unblocks:** M14, users who already run `npx @deepseek-ai/dsh web`
@@ -43,9 +43,9 @@ A tiny dsh plugin that registers a `anveshan_research` tool calling `runResearch
 
 ## Acceptance checks
 
-- [ ] Each skill directory name matches frontmatter `name`.
-- [ ] Opening this folder in dsh lists `anveshan-deep-research` in the skill catalog (manual).
-- [ ] Standalone `npm run research` still works with dsh uninstalled.
+- [x] Each skill directory name matches frontmatter `name`.
+- [x] Opening this folder in dsh lists `anveshan-deep-research` in the skill catalog (manual).
+- [x] Standalone `npm run research` still works with dsh uninstalled.
 
 ## Done means
 

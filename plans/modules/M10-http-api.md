@@ -1,6 +1,6 @@
 # M10 — HTTP API
 
-**Status:** Not started  
+**Status:** Done  
 **Goal:** Local HTTP API so a UI (and later other tools) can start research and watch progress.  
 **Depends on:** M09  
 **Unblocks:** M11
@@ -48,9 +48,9 @@ SSE: send existing events first, then live `appendEvent` notifications. Heartbea
 
 ## Acceptance checks
 
-- [ ] `curl 127.0.0.1:4747/api/health` works with the API process only.
-- [ ] Create session → start → GET snapshot eventually has findings or a clear failed error.
-- [ ] SSE receives at least a `status` event after start.
+- [x] `curl 127.0.0.1:4747/api/health` works with the API process only.
+- [x] Create session → start → GET snapshot eventually has findings or a clear failed error.
+- [x] SSE receives at least a `status` event after start.
 
 ## Done means
 

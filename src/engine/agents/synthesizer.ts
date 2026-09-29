@@ -86,14 +86,14 @@ function offlineReport(
     ? uniqueOpenAngles.map((a) => `- ${a}`).join("\n")
     : plan?.questions.length
     ? plan.questions.map((q) => `- ${q}`).join("\n")
-    : "- Further full-cell automotive benchmarking under high stack pressure\n- Long-term cycling stability (>1000 cycles) across wide temperature windows (-20°C to 60°C)";
+    : "- What are the key open problems and unresolved challenges?\n- What promising directions remain underexplored?";
 
   const conflictSection = [conflictLines, contradictionLines]
     .filter(Boolean)
     .join("\n");
 
-  // Build a quantitative table from claims with numeric data
-  const numericPattern = /(\d+\.?\d*)\s*(S\/?cm|mS\/?cm|eV|°C|cycles?|mAh|Wh|kWh|\$|\%)/i;
+  // Build a quantitative table from claims with numeric data (domain-agnostic)
+  const numericPattern = /\d+\.?\d*\s*(?:×\s*10\^?\d+\s*)?(?:%|°[CF]|[kKMGT]?(?:Hz|W|Wh|J|Pa|N|m|g|L|mol|s|A|V|Ω|S|b|B|eV|cal|bar)|(?:nm|μm|mm|cm|km|mg|kg|mL|dB|pp[mbth]|fps|rpm|USD|EUR|\$|¥|£|cycles?|mAh|Ah|mS|kWh|GWh|MPa|GPa|kPa|FLOPS?|tokens?))/i;
   const quantitativeClaims = claims.filter((c) =>
     numericPattern.test(c.statement) || numericPattern.test(c.evidence),
   );
@@ -102,7 +102,7 @@ function offlineReport(
     ? [
         "### Key Quantitative Data",
         "",
-        "| Material / System | Quantitative Finding | Source |",
+        "| Subject | Quantitative Finding | Source |",
         "|---|---|---|",
         ...quantitativeClaims.slice(0, 15).map((c) => {
           const finding = findings.find((f) => f.id === c.sourceId);
@@ -135,22 +135,6 @@ function offlineReport(
     "## Conflicts, contradictions, and their root causes",
     "",
     conflictSection || "_No conflicts identified yet._",
-    "",
-    "## Cost analysis and manufacturing scalability",
-    "",
-    "- **Precursor Costs**: Sulfide raw materials (Li2S) face scale-up cost curves, while oxide garnets require high-purity La2O3 and ZrO2.",
-    "- **Processing Capex**: Sulfides necessitate dry-room environments (<1% RH); oxide ceramics require high-temperature sintering (≥1000°C); polymer composites offer lowest entry barrier via roll-to-roll slurry coating.",
-    "- **Cell-Level Target**: Commercial EV parity targets <$80–$100/kWh at GWh volume production.",
-    "",
-    "## Technology readiness assessment",
-    "",
-    "| Electrolyte Family | Estimated TRL | Commercial Status |",
-    "|---|---|---|",
-    "| Polymer-Ceramic Composites | 6–7 | Compatible with existing roll-to-roll lines; pilot pre-production |",
-    "| Sulfide Argyrodites | 5–6 | High ionic conductivity (>5 mS/cm); moisture-tolerant surface engineering in validation |",
-    "| Oxide Garnets (LLZO) | 5–6 | Wide voltage window (>5V); high-temp sintering & interfacial resistance optimization ongoing |",
-    "| Halides (Li3InCl6, Li3YCl6) | 4 | High-voltage cathode stability; pilot synthesis exploration |",
-    "| Sodium NASICON | 3–4 | Cost-effective alternative; bulk & grain-boundary transport optimization in progress |",
     "",
     "## Open questions and future directions",
     "",
@@ -263,35 +247,19 @@ export async function writeReport(
     "  ## Key findings",
     "  ## Quantitative comparison",
     "  ## Conflicts, contradictions, and their root causes",
-    "  ## Cost analysis and manufacturing scalability",
-    "  ## Technology readiness assessment",
     "  ## Open questions and future directions",
     "  ## Sources",
     "",
-    "CRITICAL QUALITY RULES:",
-    "1. QUANTITATIVE COMPARISON TABLE: In '## Quantitative comparison', compile a full Markdown table comparing all electrolyte classes.",
-    "   Format: | Electrolyte Family | Specific Material | Room-Temp σ (mS cm⁻¹ or S cm⁻¹) | Ea (eV) | Processing Temp | Key Full-Cell Metric | Ref |",
-    "   Include both moderate and high-end superionic values (e.g. 1–25 mS cm⁻¹ for argyrodites/halides).",
+    "QUALITY RULES:",
+    "1. QUANTITATIVE COMPARISON: Where the evidence contains numeric data, compile a Markdown comparison table with columns appropriate to the research domain. Include units and cite sources with [n].",
     "",
-    "2. STRUCTURED MATERIAL BREAKDOWN: In '## Key findings', provide thorough subsections (H3 headings) for:",
-    "   - ### Sulfides (Argyrodites, LGPS-type, Li-P-S)",
-    "   - ### Oxides & Garnets (LLZO, Perovskites)",
-    "   - ### Halides & Mixed-Anions (Li3InCl6, Li3YCl6)",
-    "   - ### Polymers & Hybrid Composites (PVDF-HFP, PEO with ceramic fillers)",
-    "   - ### Sodium-based Solid Electrolytes (Na-NASICON)",
+    "2. STRUCTURED FINDINGS: In '## Key findings', organize content into logical subsections (H3 headings) appropriate to the research topic. Group by theme, category, or methodology as fits the domain.",
     "",
-    "3. COST & TECHNO-ECONOMIC ANALYSIS: In '## Cost analysis and manufacturing scalability':",
-    "   - Analyze raw material costs (Li2S precursor cost, La2O3/ZrO2 cost, polymer resin cost).",
-    "   - Discuss cell-level $/kWh estimates (e.g., target <$80-$100/kWh for commercial EV parity).",
-    "   - Compare processing Capex (dry-room moisture protection vs high-temp sintering vs roll-to-roll coating).",
+    "3. CONTRADICTION ANALYSIS: In '## Conflicts', explain root causes for any conflicting claims — differing methods, conditions, populations, or measurement approaches.",
     "",
-    "4. CONTRADICTION ROOT-CAUSE ANALYSIS: Provide deep explanations in '## Conflicts, contradictions, and their root causes' (bulk pellet conductivity vs interface space-charge resistance; neat polymers vs ceramic-loaded composites).",
-    "",
-    "5. TRL MATRIX: Provide a clear table with TRL (1-9), commercial status, and industry champions/pilot efforts.",
-    "",
-    "6. Use [n] inline citations from the source table below. Do NOT invent URLs.",
-    "7. The ## Sources section must list every source using format: [n] Title [Venue] — URL (kind, year)",
-    "8. Return ONLY the Markdown, no code fences, no extra commentary.",
+    "4. Use [n] inline citations from the source table below. Do NOT invent URLs.",
+    "5. The ## Sources section must list every source using format: [n] Title [Venue] — URL (kind, year)",
+    "6. Return ONLY the Markdown, no code fences, no extra commentary.",
     "",
     "Source index (use these [n] numbers):",
     ...sourceTableLines,
@@ -315,9 +283,10 @@ export async function writeReport(
       {
         role: "system",
         content:
-          "You are the Anveshan synthesizer — a world-class principal battery materials scientist and technical intelligence analyst. " +
-          "You write exhaustive, deeply quantitative research reports in Markdown. " +
-          "You MUST include: (1) A comprehensive quantitative comparison table, (2) Deep coverage of sulfides, oxides, halides, polymers, and sodium systems, (3) Concrete techno-economic cost and scalability analysis ($/kWh, dry-room Capex, sintering costs), (4) Thorough contradiction root-cause diagnostics, and (5) A practical TRL assessment matrix for automotive EV commercialization. " +
+          "You are the Anveshan synthesizer — a world-class research analyst and technical writer. " +
+          "You write exhaustive, deeply evidenced research reports in Markdown. " +
+          "Adapt your analysis to the specific research domain. " +
+          "Include quantitative data where available, identify contradictions and their root causes, and highlight open questions. " +
           "Never fabricate URLs — only use the provided numbered sources.",
       },
       { role: "user", content: prompt },

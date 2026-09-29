@@ -61,21 +61,21 @@ M00 Contracts
 | [M04](modules/M04-session-memory.md) | Save/load sessions, findings, provenance | Done | M00, M01 |
 | [M05](modules/M05-orchestrator.md) | Plan and next-step agent | Done | M00, M02, M04 |
 | [M06](modules/M06-search-agent.md) | Turn queries into sourced findings | Done | M03, M04 |
-| [M07](modules/M07-critic.md) | Weakness and gap review | Not started | M02, M04 |
-| [M08](modules/M08-synthesizer.md) | Structured cited report | Not started | M02, M04 |
-| [M09](modules/M09-research-loop.md) | Long-horizon loop, pause, resume | Not started | M05–M08 |
-| [M10](modules/M10-http-api.md) | Local API + live events | Not started | M09 |
-| [M11](modules/M11-web-ui.md) | Start research, progress, download | Not started | M10 |
-| [M12](modules/M12-cli.md) | One-command research run | Not started | M09 |
-| [M13](modules/M13-dsh-skills.md) | DeepSeek Harness skills/plugins | Not started | M09 |
+| [M07](modules/M07-critic.md) | Weakness and gap review | Done | M02, M04 |
+| [M08](modules/M08-synthesizer.md) | Structured cited report | Done | M02, M04 |
+| [M09](modules/M09-research-loop.md) | Long-horizon loop, pause, resume | Done | M05–M08 |
+| [M10](modules/M10-http-api.md) | Local API + live events | Done | M09 |
+| [M11](modules/M11-web-ui.md) | Start research, progress, download | Done | M10 |
+| [M12](modules/M12-cli.md) | One-command research run | Done | M09 |
+| [M13](modules/M13-dsh-skills.md) | DeepSeek Harness skills/plugins | Done | M09 |
 | [M14](modules/M14-domain-pack.md) | First domain pack (after MVP) | Later | M13 |
-| [M15](modules/M15-docs-and-release.md) | README, license, examples | Last | M11, M12 |
+| [M15](modules/M15-docs-and-release.md) | README, license, examples | Done | M11, M12 |
 
 Status key: `Not started` · `In progress` · `Done` · `Later`
 
 ## Current repo note
 
-M00–M06 are signed off. Next work starts at M07 (critic).
+M00–M13 and M15 are signed off. MVP Deep Research OS is fully implemented and verified across Web UI, CLI, HTTP API, and DeepSeek Harness skills. M14 (Domain packs) is scheduled for post-MVP.
 
 ## Success bar for the first version
 

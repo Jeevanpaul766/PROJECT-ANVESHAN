@@ -1,6 +1,6 @@
 # M09 — Research loop
 
-**Status:** Not started  
+**Status:** Done  
 **Goal:** One function that runs the long-horizon cycle and can be cancelled or resumed.  
 **Depends on:** M05, M06, M07, M08  
 **Unblocks:** M10, M12, M13
@@ -60,9 +60,9 @@ The loop should be able to sit in this while-cycle for 30–60 minutes when `max
 
 ## Acceptance checks
 
-- [ ] `maxRounds=1` produces a report file and status `completed`.
-- [ ] Abort mid-search leaves a snapshot that `loadSnapshot` can read.
-- [ ] Resume: start a session, pause after round 1, call `runResearch` again, rounds continue from `roundsCompleted` (do not wipe findings).
+- [x] `maxRounds=1` produces a report file and status `completed`.
+- [x] Abort mid-search leaves a snapshot that `loadSnapshot` can read.
+- [x] Resume: start a session, pause after round 1, call `runResearch` again, rounds continue from `roundsCompleted` (do not wipe findings).
 
 ## Done means
 

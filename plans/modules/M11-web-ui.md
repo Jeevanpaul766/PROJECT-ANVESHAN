@@ -1,6 +1,6 @@
 # M11 — Web UI
 
-**Status:** Not started  
+**Status:** Done  
 **Goal:** A simple local UI to enter a goal, watch which agent is working, browse sources, download the report, and resume a session.  
 **Depends on:** M10  
 **Unblocks:** M15
@@ -50,10 +50,10 @@ Beautiful polish, onboarding tours, mobile app, account screens.
 
 ## Acceptance checks
 
-- [ ] `npm run dev` opens UI and health is visible (LLM ok or not).
-- [ ] Starting a run shows live events without refresh.
-- [ ] Completed run: download saves a `.md` file.
-- [ ] Clicking an old session loads snapshot and can Start again if paused.
+- [x] `npm run dev` opens UI and health is visible (LLM ok or not).
+- [x] Starting a run shows live events without refresh.
+- [x] Completed run: download saves a `.md` file.
+- [x] Clicking an old session loads snapshot and can Start again if paused.
 
 ## Done means
 

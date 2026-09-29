@@ -1,6 +1,6 @@
 # M07 — Critic agent
 
-**Status:** Not started  
+**Status:** Done  
 **Goal:** Read current findings and return gaps, weak claims, and follow-up queries.  
 **Depends on:** M02, M04  
 **Unblocks:** M09
@@ -32,9 +32,9 @@ Cap `nextQueries` at 4.
 
 ## Acceptance checks
 
-- [ ] Offline: still returns a `Critique` with at least one `nextQueries` item.
-- [ ] `nextQueries` are non-empty strings.
-- [ ] Function does not write to disk (M09 / store does that).
+- [x] Offline: still returns a `Critique` with at least one `nextQueries` item.
+- [x] `nextQueries` are non-empty strings.
+- [x] Function does not write to disk (M09 / store does that).
 
 ## Done means
 

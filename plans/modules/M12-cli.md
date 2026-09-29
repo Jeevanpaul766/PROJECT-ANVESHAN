@@ -1,6 +1,6 @@
 # M12 — CLI
 
-**Status:** Not started  
+**Status:** Done  
 **Goal:** Run one research job from the terminal and print the report path.  
 **Depends on:** M09  
 **Unblocks:** M15, headless demos
@@ -39,8 +39,8 @@ Exit codes: 0 completed, 1 failed, 130 cancelled (SIGINT → pause/cancel).
 
 ## Acceptance checks
 
-- [ ] Ctrl+C leaves a loadable session on disk.
-- [ ] Completed run prints a path that exists and contains `## Sources`.
+- [x] Ctrl+C leaves a loadable session on disk.
+- [x] Completed run prints a path that exists and contains `## Sources`.
 
 ## Done means
 
