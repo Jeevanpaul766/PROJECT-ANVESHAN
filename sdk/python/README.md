@@ -104,10 +104,13 @@ export LANGCHAIN_API_KEY="your-api-key"
 export LANGCHAIN_PROJECT="anveshan-deep-research"
 ```
 
-Every research run automatically logs:
-* **Root Run (`AnveshanDeepResearch`)**: Goal, total duration, final report.
-* **Child Spans**: Orchestrator planning, search query execution, evidence extraction, critic review, synthesizer generation.
-* **Run Metadata**: Number of sources, claims extracted, model used, and latency.
+Every research run automatically logs a 3-level hierarchical trace waterfall with real latencies and child tool badges:
+
+![LangSmith Trace Waterfall](../../docs/assets/langsmith_trace_waterfall.png)
+
+* **Level 1 (`DeepResearchAgent`)**: Conversational agent decision and final summary.
+* **Level 2 (`anveshan_deep_research`)**: Tool execution span with run ID and arguments.
+* **Level 3 (Child Spans)**: `academic_search_tool`, `claim_extraction_tool`, `critic_agent_review`, and `report_synthesizer`.
 
 ### Automated Evaluation Suite
 Run benchmark quality evaluation on generated reports:

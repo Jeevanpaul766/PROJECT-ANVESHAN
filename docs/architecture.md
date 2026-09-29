@@ -1,84 +1,109 @@
-# Project Anveshan Architecture
+# Project Anveshan Architecture 🧭
 
-Project Anveshan is an open-source **Deep Research OS** designed for long-horizon, autonomous, and sourced academic/technical investigations. It operates on a local-first, free-first architecture that runs smoothly on standard consumer hardware (e.g. MacBook or desktop) while supporting local Ollama models and cloud fallback providers.
+> **Comprehensive Systems Architecture, Telemetry, and Storage Specifications**  
+> *For conceptual and agentic design patterns, see [docs/agentic_ai_design.md](agentic_ai_design.md).*
 
 ---
 
-## Architectural Diagram
+## 1. High-Level Systems Topology
 
-```text
-                    ┌───────────────────────────┐
-                    │   User Control Surfaces   │
-                    │  Web UI (M11) · CLI (M12) │
-                    │    DSH Skills (M13)       │
-                    └─────────────┬─────────────┘
-                                  │
-                                  ▼
-                    ┌───────────────────────────┐
-                    │    HTTP REST & SSE API    │
-                    │      127.0.0.1:4747       │
-                    └─────────────┬─────────────┘
-                                  │
-                                  ▼
-      ┌───────────────────────────────────────────────────────┐
-      │              Adaptive Research Engine (M09)            │
-      │                  Loop Scheduler & Guards              │
-      └───┬──────────────┬───────────────┬────────────────┬───┘
-          │              │               │                │
-          ▼              ▼               ▼                ▼
-   ┌─────────────┐┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-   │Orchestrator ││Search Agent │ │   Critic    │ │ Synthesizer │
-   │    (M05)    ││    (M06)    │ │    (M07)    │ │    (M08)    │
-   └─────────────┘└──────┬──────┘ └─────────────┘ └─────────────┘
-                         │
-                         ▼
-        ┌───────────────────────────────────┐
-        │       Multi-Source Manager        │
-        │ arXiv · Semantic Scholar · Brave  │
-        └───────────────────────────────────┘
+Project Anveshan separates concerns across **Control Surfaces**, an **HTTP/SSE API Gateway**, an **Adaptive Research Engine**, **Specialized Subsystem Agents**, and **Durable Storage**:
 
-   ┌──────────────────────────────────────────────────────────┐
-   │                    Shared Subsystems                     │
-   │  Session Store (M04)          LLM Multi-Provider Router  │
-   │  data/sessions/<id>/*.json    Ollama · Gemini · Groq     │
-   └──────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph ControlSurfaces [Control Surfaces]
+        WebUI[React + Vite Web Dashboard<br/>:5173]
+        CLI[Headless Terminal CLI<br/>src/cli.ts]
+        PythonSDK[Python SDK / LangGraph<br/>sdk/python/]
+    end
+
+    subgraph APIGateway [HTTP REST & SSE Gateway :4747]
+        API[Express 5 Server<br/>src/server/]
+        SSEStream[Server-Sent Events<br/>/api/sessions/:id/events]
+    end
+
+    subgraph Engine [Adaptive Research Engine]
+        LoopScheduler[Loop Scheduler & Mutex Guard<br/>src/engine/loop.ts]
+        ConvergenceEngine[Streak Novelty Engine<br/>Early Termination Guard]
+    end
+
+    subgraph Agents [Specialized Multi-Agent Nodes]
+        Orchestrator[Orchestrator Agent<br/>src/engine/agents/orchestrator.ts]
+        SearchMgr[Search Manager<br/>src/engine/search/]
+        ClaimExtractor[Evidence Extractor<br/>src/engine/agents/evidence.ts]
+        Critic[Adversarial Critic<br/>src/engine/agents/critic.ts]
+        Synthesizer[Report Synthesizer<br/>src/engine/agents/synthesizer.ts]
+    end
+
+    subgraph Sources [Academic & Web Ingestion]
+        arXiv[arXiv API]
+        SemanticScholar[Semantic Scholar API]
+        CrossRef[CrossRef DOI Registry]
+        WebSearch[Brave / Fallback Web Search]
+    end
+
+    subgraph Persistence [Durable On-Disk State]
+        SessionStore[(data/sessions/:id/<br/>Atomic JSON Checkpoints)]
+    end
+
+    ControlSurfaces -->|HTTP / SSE| APIGateway
+    APIGateway --> Engine
+    LoopScheduler --> Orchestrator
+    LoopScheduler --> SearchMgr
+    SearchMgr --> Sources
+    LoopScheduler --> ClaimExtractor
+    LoopScheduler --> Critic
+    Critic --> ConvergenceEngine
+    ConvergenceEngine -->|Converged| Synthesizer
+    ConvergenceEngine -->|Gaps Remain| Orchestrator
+    LoopScheduler <--> SessionStore
+    Synthesizer --> SessionStore
 ```
 
 ---
 
-## Core System Layers
+## 2. Core System Layers
 
-### 1. Control Surfaces
-- **Web UI (`web/`)**: A fast, zero-bloat React + Vite dashboard displaying real-time agent events via Server-Sent Events (SSE), source cards, and a report download trigger.
-- **CLI (`src/cli.ts`)**: Headless terminal runner (`npm run research -- "<goal>"`) supporting interactive event streaming, `--rounds`, `--resume`, and graceful SIGINT pauses (exit code 130).
-- **DeepSeek Harness Skills (`.dsh/skills/`)**: Five standardized DSH skills enabling agentic workflows inside DeepSeek Harness workspaces.
+### A. Control Surfaces
+1. **Web Dashboard (`web/`)**:
+   - Modern single-page application built on Vite, React 18, and TypeScript.
+   - Subscribes to real-time agent lifecycle events via Server-Sent Events (`/api/sessions/:id/events`).
+   - Displays real-time agent status pills, session history, source cards, adversarial critiques, and live Markdown report rendering with clipboard and download triggers.
+2. **Terminal CLI (`src/cli.ts`)**:
+   - Headless research runner (`npm run research -- "<goal>"`).
+   - Real-time formatted console logging of agent planning, findings, and synthesis.
+   - Supports `--rounds <n>`, `--resume <sessionId>`, and graceful `SIGINT` pause with atomic state persistence.
+3. **Python SDK & LangGraph Node (`sdk/python/`)**:
+   - Typed Pydantic v2 data models with sync and async HTTP clients.
+   - Native LangChain `BaseTool` (`AnveshanDeepResearchTool`) for ReAct agents.
+   - Native LangGraph StateGraph Node (`create_anveshan_node`) for multi-agent graph pipelines.
+   - Full LangSmith tracing integration with automated Citation Integrity and Source Authority evaluation.
 
-### 2. Control & Event API (`src/server/`)
-- Express 5 server bound strictly to `127.0.0.1:4747`.
-- Non-blocking session orchestration: `POST /api/sessions/:id/start` kicks off background research immediately.
-- Live telemetry: `GET /api/sessions/:id/events` streams live state updates over Server-Sent Events (SSE) with periodic keepalive heartbeats.
-- Serves static pre-built React assets from `web/dist`.
+### B. HTTP & Event Telemetry Gateway (`src/server/`)
+- Express 5 server bound strictly to local loopback `127.0.0.1:4747`.
+- **REST Endpoints**:
+  - `POST /api/sessions`: Creates an uninitialized session.
+  - `POST /api/sessions/:id/start`: Launches autonomous background research immediately without blocking HTTP requests.
+  - `POST /api/sessions/:id/pause`: Gracefully pauses active loop execution.
+  - `GET /api/sessions`: Returns list of all historical sessions on disk.
+  - `GET /api/sessions/:id`: Returns session status, metadata, and final report.
+  - `GET /api/sessions/:id/events`: Opens an append-only SSE stream delivering real-time agent event payloads with keepalive heartbeats every 15 seconds.
 
-### 3. Adaptive Research Loop (`src/engine/loop.ts`)
+### C. Adaptive Research Loop (`src/engine/loop.ts`)
 The OS scheduler that drives the iterative multi-round pipeline:
-- **Round Cycle**: Plan → Parallel Bounded Search → Batched Claim Extraction → Dedup → Contradiction Detection → Critique → Gap Detection → Convergence Check.
-- **State Preservation**: Saves progress after every phase; runs are fully pausable and resumable.
-- **Concurrency Guard**: Strict in-memory mutex prevents simultaneous duplicate runs on the same session ID.
+- **Round Cycle**:
+  1. `plan`: Orchestrator drafts `ResearchPlan` with discrete sub-tasks.
+  2. `search`: Search Manager concurrently queries arXiv, Semantic Scholar, CrossRef, and Web.
+  3. `extract`: Evidence Extractor parses raw findings into atomic propositions (8 sources per batch).
+  4. `dedup`: Deduplication engine removes redundant claims based on lexical and semantic similarity.
+  5. `critic`: Adversarial Critic evaluates claims, identifies weaknesses, and formulates gap matrix.
+  6. `converge`: Dynamic convergence engine calculates information delta ($\Delta I$). If streak of zero new findings $\ge 2$, early convergence terminates search.
+  7. `synthesize`: Synthesizer compiles verified findings and claims into an AST-guarded, cited markdown report.
+- **Concurrency Guard**: Strict in-memory mutex (`activeSessionLocks`) prevents duplicate parallel runs on the same session directory.
 
-### 4. Specialized Agents (`src/engine/agents/`)
-- **Orchestrator (`orchestrator.ts`)**: Formulates an initial or follow-up `ResearchPlan` composed of focused `ResearchTask` queries. Uses fast-path planning when previous rounds indicate narrow gaps.
-- **Search Manager (`src/engine/search/`)**: Concurrently executes search tasks across arXiv, Semantic Scholar, CrossRef, and web search engines with rate-limiting, deduplication, and snippet normalization.
-- **Evidence Extractor (`evidence.ts`)**: Extracts atomic, falsifiable claims from raw findings with batching (up to 8 sources per LLM prompt).
-- **Critic & Gap Detector (`critic.ts`, `gapDetector.ts`)**: Dissects evidence for weaknesses, unverified assumptions, and logical contradictions, issuing prioritized follow-up queries.
-- **Synthesizer (`synthesizer.ts`)**: Compiles all verified findings, claims, and citations into an extensive, structured Markdown research report with numerical source references.
-
-### 5. Multi-Provider LLM Router (`src/engine/llm.ts`)
-- Tiered cascade: Priority cloud providers (Gemini, Groq, OpenRouter) → Local Ollama fallback.
-- Rate-limit and quota management with exponential backoff and transparent rollover.
-- Offline resilience: If all models are unreachable or unconfigured, agents switch to deterministic rule-based algorithms to guarantee completion without unhandled crashes.
-
-### 6. Session Disk Memory (`src/engine/store.ts`)
+### D. Durable On-Disk Session Memory (`src/engine/store.ts`)
 Every session is an isolated on-disk folder under `data/sessions/<session-id>/`:
+
 ```text
 data/sessions/<session-id>/
 ├── meta.json         # Session status, timestamps, model info, performance metrics
@@ -92,26 +117,40 @@ data/sessions/<session-id>/
 
 ---
 
-## End-to-End Data Flow
+## 3. Telemetry Event Schema
 
-```text
-1. User supplies research goal
-       │
-2. Orchestrator builds ResearchPlan (queries + rationale)
-       │
-3. Search Manager queries arXiv, Semantic Scholar, and Web APIs
-       │
-4. Quality Scorer & Evidence Extractor produce verified Claims
-       │
-5. Lexical & Semantic Deduplicator clusters duplicate claims
-       │
-6. Critic & Gap Detector evaluate evidence sufficiency
-       │
-   ┌───┴────────────────────────────────────────┐
-   ▼                                            ▼
-Gaps remain & rounds < maxRounds       Evidence sufficient / max reached
-   │                                            │
-Return to Step 2 with targeted queries         Synthesizer formats report.md
-                                                │
-                                       Session marked "completed"
+All events emitted to the Web UI, CLI, and Python client follow a strict JSON schema:
+
+```typescript
+export interface ResearchEvent {
+  id: string;              // Unique event UUID
+  sessionId: string;       // Session identifier
+  timestamp: string;       // ISO 8601 UTC timestamp
+  source: "orchestrator" | "search" | "evidence" | "critic" | "synthesizer" | "system";
+  kind: "status" | "plan" | "finding" | "claim" | "critique" | "synthesis" | "error";
+  data: Record<string, unknown>;
+  message: string;         // Human-readable log line
+}
 ```
+
+---
+
+## 4. Multi-Provider LLM Router Architecture
+
+The router in `src/engine/llm.ts` handles graceful fallback across local and cloud LLMs:
+
+```mermaid
+graph TD
+    Request[Agent LLM Request] --> Tier1{Local Ollama<br/>qwen2.5:7b}
+    Tier1 -->|Success| Response[Return LLM Response]
+    Tier1 -->|Connection Refused / Timeout| Tier2{Cloud Groq<br/>openai/gpt-oss-120b}
+    Tier2 -->|Success| Response
+    Tier2 -->|Rate Limit 429 / Auth Error| Tier3{Google Gemini<br/>gemini-2.0-flash}
+    Tier3 -->|Success| Response
+    Tier3 -->|Quota Exceeded| Tier4{OpenRouter<br/>deepseek-r1:free}
+    Tier4 -->|Success| Response
+    Tier4 -->|All Providers Exhausted| DeterministicFallback[Deterministic Offline Fallback<br/>Rule-Based Extraction & Assembly]
+    DeterministicFallback --> Response
+```
+
+This ensures that Anveshan **never crashes or throws unhandled exceptions** due to upstream provider outages or rate limits.
