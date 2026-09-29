@@ -5,7 +5,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node: >=20](https://img.shields.io/badge/node-%3E%3D20-green.svg)](package.json)
+[![Python: >=3.9](https://img.shields.io/badge/python-%3E%3D3.9-blue.svg)](sdk/python/pyproject.toml)
 [![TypeScript: 5.8](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](tsconfig.json)
+[![LangGraph: Ready](https://img.shields.io/badge/LangGraph-Integration-orange.svg)](sdk/python/README.md)
 
 ---
 
@@ -27,7 +29,7 @@ Anveshan runs autonomously for extended periods (30–60 minutes per investigati
 - **Critic & Gap Detection**: Independent critic agent identifies unsupported assertions, flags contradicting claims, and formulates targeted follow-up queries.
 - **Strict Citation Provenance**: Every generated insight links to an explicit source URL and metadata — zero hallucinated source references.
 - **Resilient Multi-Provider LLM Router**: Seamless cascading across **Ollama (local)**, **Google Gemini**, **Groq**, and **OpenRouter**, with automatic rate-limit backoff and offline deterministic fallbacks.
-- **Three Ways to Operate**: Modern React Web UI, headless terminal CLI, or DeepSeek Harness skills.
+- **Four Ways to Operate**: Modern React Web UI, Python SDK & LangGraph, headless terminal CLI, or DeepSeek Harness skills.
 
 ---
 
@@ -129,6 +131,35 @@ npm run research -- --resume sess_1a90fcc10c3f
 ```
 
 *Pressing `Ctrl+C` cleanly pauses the session and saves all state to disk without data loss.*
+
+### 4. Python SDK & LangGraph Integration
+Install the Python SDK to invoke Anveshan from Python scripts, **LangChain tools**, or **LangGraph multi-agent state graphs**:
+
+```bash
+# Install local Python SDK with LangChain/LangGraph extras
+pip install -e "./sdk/python[langchain]"
+```
+
+```python
+from anveshan import AnveshanClient
+
+client = AnveshanClient("http://127.0.0.1:4747")
+report = client.research("Topological quantum error correction", rounds=2)
+print(report.markdown)
+```
+
+Use Anveshan as a custom node in **LangGraph**:
+```python
+from langgraph.graph import StateGraph, START, END
+from anveshan.integrations.langgraph import AnveshanResearchState, create_anveshan_node
+
+builder = StateGraph(AnveshanResearchState)
+builder.add_node("deep_research", create_anveshan_node(api_url="http://127.0.0.1:4747"))
+builder.add_edge(START, "deep_research")
+builder.add_edge("deep_research", END)
+app = builder.compile()
+```
+*Full documentation, LangSmith tracing, and examples in [sdk/python/README.md](sdk/python/README.md).*
 
 ---
 

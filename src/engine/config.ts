@@ -73,9 +73,9 @@ export const PROVIDERS = {
     name: "ollama",
     apiKey: "ollama",
     baseUrl: env("OLLAMA_BASE_URL", "http://127.0.0.1:11434/v1"),
-    model: env("ANVESHAN_OLLAMA_MODEL", "qwen2.5:14b"),
+    model: env("ANVESHAN_OLLAMA_MODEL", "qwen2.5:7b"),
     fastModel: env("ANVESHAN_OLLAMA_FAST_MODEL", "qwen2.5:7b"),
-    smartModel: env("ANVESHAN_OLLAMA_SMART_MODEL", "qwen2.5:14b"),
+    smartModel: env("ANVESHAN_OLLAMA_SMART_MODEL", "qwen2.5:7b"),
   },
 };
 
@@ -125,22 +125,35 @@ export type ModelRole = "fast" | "smart";
 export function resolveModel(role: ModelRole, baseModel?: string): string {
   if (baseModel) {
     const trimmed = baseModel.trim();
-    if (trimmed.startsWith("ollama:") || trimmed.startsWith("qwen2.5") || trimmed === "ollama") {
+    // If a specific provider model tag is given (e.g. "ollama:qwen2.5:7b"), preserve it exactly
+    if (trimmed.startsWith("ollama:") && trimmed.length > "ollama:".length) {
+      return trimmed;
+    }
+    if (trimmed.startsWith("groq:") && trimmed.length > "groq:".length) {
+      return trimmed;
+    }
+    if (trimmed.startsWith("gemini:") && trimmed.length > "gemini:".length) {
+      return trimmed;
+    }
+    if (trimmed.startsWith("openrouter:") && trimmed.length > "openrouter:".length) {
+      return trimmed;
+    }
+    if (trimmed.startsWith("ollama") || trimmed.startsWith("qwen2.5")) {
       return role === "fast"
         ? `ollama:${PROVIDERS.ollama.fastModel}`
         : `ollama:${PROVIDERS.ollama.smartModel}`;
     }
-    if (trimmed.startsWith("groq:")) {
+    if (trimmed.startsWith("groq")) {
       return role === "fast"
         ? `groq:${PROVIDERS.groq.fastModel}`
         : `groq:${PROVIDERS.groq.smartModel}`;
     }
-    if (trimmed.startsWith("gemini:")) {
+    if (trimmed.startsWith("gemini")) {
       return role === "fast"
         ? `gemini:${PROVIDERS.gemini.fastModel}`
         : `gemini:${PROVIDERS.gemini.smartModel}`;
     }
-    if (trimmed.startsWith("openrouter:")) {
+    if (trimmed.startsWith("openrouter")) {
       return role === "fast"
         ? `openrouter:${PROVIDERS.openrouter.fastModel}`
         : `openrouter:${PROVIDERS.openrouter.smartModel}`;

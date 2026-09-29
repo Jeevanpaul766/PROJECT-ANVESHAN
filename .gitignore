@@ -5,3 +5,9 @@ data/sessions/*
 .env
 .DS_Store
 *.log
+.venv
+venv
+__pycache__
+*.pyc
+*.egg-info
+.pytest_cache
