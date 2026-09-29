@@ -13,6 +13,13 @@ Most modern Large Language Model (LLM) applications rely on **Single-Prompt Gene
 
 $$\mathbf{Agent} = \mathbf{Model} + \mathbf{Harness} + \mathbf{Skills} + \mathbf{Memory} + \mathbf{Domain\ Knowledge}$$
 
+In Anveshan, this formula is realized concretely across the stack:
+* **Model**: Probabilistic reasoning kernels (local `qwen2.5:7b` via Ollama, cloud `openai/gpt-oss-120b` via Groq, `gemini-2.0-flash`).
+* **Harness**: Deterministic execution runtime managing process lifecycles, loop scheduling, tool-calling guards, and environment orchestration (implemented via **DeepSeek Harness** integration and the Node.js/LangGraph runtime).
+* **Skills**: Modular, declarative capability packages (shipped under `.dsh/skills/` as `anveshan-orchestrator`, `anveshan-search`, `anveshan-critic`, `anveshan-synthesizer`) allowing agents to dynamically invoke specialized functions.
+* **Memory**: Durable, append-only disk memory (`data/sessions/<id>/*.json`) storing task trees, proposition graphs, critique matrices, and audit logs.
+* **Domain Knowledge**: Dynamic multi-source ingestion across academic registries (arXiv, CrossRef, Semantic Scholar, live web).
+
 Rather than treating the LLM as an oracle that produces an entire research paper in a single unconstrained completion, Anveshan treats models as **probabilistic reasoning kernels** embedded within a **deterministic systems harness**. The harness provides strict memory boundaries, typed I/O contracts, adversarial critique loops, and verifiable citation graphs.
 
 ---

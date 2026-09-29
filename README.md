@@ -10,6 +10,7 @@
 [![LangChain: Tool Ready](https://img.shields.io/badge/LangChain-BaseTool-blueviolet.svg)](sdk/python/README.md)
 [![LangGraph: StateGraph](https://img.shields.io/badge/LangGraph-StateGraph-orange.svg)](sdk/python/README.md)
 [![LangSmith: 100% Citation Integrity](https://img.shields.io/badge/LangSmith-Evaluated_100%25-purple.svg)](sdk/python/README.md)
+[![DeepSeek Harness: 5 Skills](https://img.shields.io/badge/DeepSeek_Harness-5_Skills-blue.svg)](docs/dsh.md)
 [![Ollama: Local First](https://img.shields.io/badge/Ollama-Local_First-black.svg)](https://ollama.com/)
 
 ---
@@ -216,6 +217,23 @@ print(result["research_report"])
 ```bash
 python sdk/python/examples/04_langsmith_evaluation.py
 ```
+
+#### D. DeepSeek Harness (DSH) Skills
+Anveshan provides 5 standardized agent skills under `.dsh/skills/` allowing coding agents running inside **DeepSeek Harness** to execute deep research sessions:
+
+```bash
+# Open workspace in DeepSeek Harness
+dsh open .
+```
+
+Harness automatically discovers the skill catalog:
+* `anveshan-deep-research`: Master pipeline orchestration skill.
+* `anveshan-orchestrator`: Goal decomposition into parallel search tasks.
+* `anveshan-search`: Academic source gathering with DOI/arXiv provenance.
+* `anveshan-critic`: Critical evaluation and contradiction detection.
+* `anveshan-synthesizer`: Publication-grade cited research report compiler.
+
+*See [docs/dsh.md](docs/dsh.md) for complete instructions.*
 
 ---
 

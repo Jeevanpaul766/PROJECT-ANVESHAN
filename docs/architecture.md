@@ -78,6 +78,9 @@ graph TD
    - Native LangChain `BaseTool` (`AnveshanDeepResearchTool`) for ReAct agents.
    - Native LangGraph StateGraph Node (`create_anveshan_node`) for multi-agent graph pipelines.
    - Full LangSmith tracing integration with automated Citation Integrity and Source Authority evaluation.
+4. **DeepSeek Harness Skills (`.dsh/skills/`)**:
+   - 5 standardized agent skills (`anveshan-deep-research`, `anveshan-orchestrator`, `anveshan-search`, `anveshan-critic`, `anveshan-synthesizer`).
+   - Enables coding agents operating in DeepSeek Harness workspaces (`dsh open .`) to drive autonomous deep research sessions or step-by-step investigations with tool calling.
 
 ### B. HTTP & Event Telemetry Gateway (`src/server/`)
 - Express 5 server bound strictly to local loopback `127.0.0.1:4747`.
