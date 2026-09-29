@@ -316,10 +316,12 @@ export default function App() {
     }
   }, [activeSessId]);
 
-  // ── Download report ───────────────────────────────────────────────────────
+  // ── Download report (.md & .txt) ──────────────────────────────────────────
+  const [copied, setCopied] = useState(false);
+
   const handleDownload = useCallback(async () => {
     if (!activeSessId || !snap?.reportMarkdown) return;
-    const blob = new Blob([snap.reportMarkdown], { type: "text/markdown" });
+    const blob = new Blob([snap.reportMarkdown], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -331,6 +333,28 @@ export default function App() {
     a.click();
     URL.revokeObjectURL(url);
   }, [activeSessId, snap]);
+
+  const handleDownloadTxt = useCallback(async () => {
+    if (!activeSessId || !snap?.reportMarkdown) return;
+    const blob = new Blob([snap.reportMarkdown], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const slug = (snap.meta.goal ?? "report")
+      .slice(0, 40)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-");
+    a.download = `anveshan-${slug}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [activeSessId, snap]);
+
+  const handleCopy = useCallback(async () => {
+    if (!snap?.reportMarkdown) return;
+    await navigator.clipboard.writeText(snap.reportMarkdown);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [snap]);
 
   // ── Derived state ─────────────────────────────────────────────────────────
   const activeMeta = snap?.meta ?? sessions.find((s) => s.id === activeSessId);
@@ -659,9 +683,45 @@ export default function App() {
                     {snap.reportMarkdown}
                   </ReactMarkdown>
                 </div>
-                <div className="download-bar">
-                  <button className="btn-download" onClick={handleDownload}>
-                    ⬇ Download Report (.md)
+                <div className="download-bar" style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button className="btn-download" onClick={handleDownload} style={{ flex: 1 }}>
+                      ⬇ Download (.md)
+                    </button>
+                    <button
+                      className="btn-download"
+                      onClick={handleDownloadTxt}
+                      style={{
+                        flex: 1,
+                        background: "var(--surface-3)",
+                        border: "1px solid var(--border)",
+                        color: "var(--text-1)",
+                        boxShadow: "none"
+                      }}
+                      title="Opens in any text editor (TextEdit, Notes) without needing Markdown viewer"
+                    >
+                      📄 Download (.txt)
+                    </button>
+                  </div>
+                  <button
+                    className="btn-secondary"
+                    onClick={handleCopy}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      padding: "8px",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      background: copied ? "rgba(34, 197, 94, 0.2)" : undefined,
+                      borderColor: copied ? "var(--success)" : undefined,
+                      color: copied ? "var(--success)" : undefined,
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    {copied ? "✓ Copied to clipboard!" : "📋 Copy Markdown to Clipboard"}
                   </button>
                 </div>
               </>
