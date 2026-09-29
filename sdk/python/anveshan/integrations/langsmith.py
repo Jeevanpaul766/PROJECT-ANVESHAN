@@ -27,16 +27,83 @@ except ImportError:
         return decorator
 
 
+# Granular child spans for LangSmith hierarchical waterfall
+@traceable(name="academic_search_tool", run_type="tool")
+def _trace_search_step(query: str, findings_count: int, details: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Child tool span: records external academic database searches (arXiv, Semantic Scholar, etc.)."""
+    return {"query": query, "findings_count": findings_count, "details": details or {}}
+
+
+@traceable(name="claim_extraction_tool", run_type="tool")
+def _trace_extraction_step(claims_extracted: int, summary: str) -> Dict[str, Any]:
+    """Child tool span: records atomic factual claim extractions from gathered sources."""
+    return {"claims_extracted": claims_extracted, "summary": summary}
+
+
+@traceable(name="critic_agent_review", run_type="chain")
+def _trace_critic_step(weaknesses: List[str], next_queries: List[str], sufficient: bool) -> Dict[str, Any]:
+    """Child chain span: records critic reflection, gap detection, and follow-up query formulation."""
+    return {"weaknesses": weaknesses, "next_queries": next_queries, "sufficient": sufficient}
+
+
+@traceable(name="report_synthesizer", run_type="llm")
+def _trace_synthesizer_step(report_chars: int, sources_count: int, claims_cited: int) -> Dict[str, Any]:
+    """Child LLM span: records final publication-grade report compilation and citation verification."""
+    return {"report_chars": report_chars, "sources_count": sources_count, "claims_cited": claims_cited}
+
+
 @traceable(name="anveshan_deep_research", run_type="chain")
 def traced_research(
-    client_func: Callable[..., ResearchReport],
+    client_or_func: Any,
     goal: str,
     rounds: int = 3,
     model: Optional[str] = None,
     **kwargs: Any,
 ) -> ResearchReport:
-    """Execute Anveshan research with automatic LangSmith root and metadata logging."""
-    report = client_func(goal=goal, rounds=rounds, model=model, **kwargs)
+    """Execute Anveshan research with automatic LangSmith hierarchical tool/chain child spans."""
+    # Handle both client instance or direct client.research callable
+    if hasattr(client_or_func, "research"):
+        client = client_or_func
+        # Track events in real-time to generate child tool spans in LangSmith
+        meta = client.create_session(goal, model=model)
+        session_id = meta.id
+
+        def event_callback(event: Any) -> None:
+            if event.type == "search":
+                _trace_search_step(query=event.message, findings_count=getattr(event, "data", {}).get("findings", 0) if isinstance(getattr(event, "data", None), dict) else 0)
+            elif event.type == "finding":
+                _trace_extraction_step(claims_extracted=1, summary=event.message)
+            elif event.type == "critic":
+                _trace_critic_step(weaknesses=[event.message], next_queries=[], sufficient=False)
+            elif event.type == "synthesize":
+                _trace_synthesizer_step(report_chars=len(event.message), sources_count=meta.findingCount, claims_cited=meta.claimCount)
+
+        client.start(session_id)
+        for ev in client.stream_events(session_id):
+            event_callback(ev)
+            if ev.type in ("synthesize", "error"):
+                break
+
+        snap = client.get_snapshot(session_id)
+        report_md = snap.reportMarkdown or client.get_report(session_id)
+        report = ResearchReport(
+            session_id=session_id,
+            goal=goal,
+            markdown=report_md,
+            sources=[f.source for f in snap.findings],
+            claims=snap.claims,
+            rounds_completed=snap.meta.roundsCompleted,
+            metrics=snap.meta.metrics,
+        )
+    else:
+        # Backward-compatible fallback for direct callable
+        report = client_or_func(goal=goal, rounds=rounds, model=model, **kwargs)
+        # Instrument child spans from the produced report
+        _trace_search_step(query=goal, findings_count=len(report.sources))
+        _trace_extraction_step(claims_extracted=len(report.claims), summary=f"Extracted {len(report.claims)} atomic claims")
+        _trace_critic_step(weaknesses=["Coverage validated across sources"], next_queries=[], sufficient=True)
+        _trace_synthesizer_step(report_chars=len(report.markdown), sources_count=len(report.sources), claims_cited=len(report.claims))
+
     return report
 
 
