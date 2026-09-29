@@ -177,9 +177,15 @@ def log_to_langsmith(
         return False
 
     try:
+        import uuid as _uuid
+        try:
+            target_uuid = _uuid.UUID(str(run_id))
+        except ValueError:
+            target_uuid = _uuid.uuid5(_uuid.NAMESPACE_DNS, str(run_id))
+
         ls_client = LangSmithClient()
         ls_client.create_feedback(
-            run_id=run_id,
+            run_id=target_uuid,
             key=metric_name,
             score=score,
             comment=comment,
