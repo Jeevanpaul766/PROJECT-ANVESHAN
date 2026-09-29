@@ -1,80 +1,83 @@
 /**
- * High-precision domain relevance filter.
+ * High-precision domain-agnostic relevance filter.
  * 100% deterministic (zero LLM overhead).
- * Rejects off-topic papers (cybersecurity, fuel cells, superconductivity, vehicular tire friction)
- * while preserving high-relevance solid-state battery materials literature.
+ * Rejects off-topic metadata and ensures sources share conceptual
+ * keywords with the research goal or search query.
  */
 
 import type { Source } from "./types.js";
 
-// Unrelated topics to explicitly block
-const REJECT_PATTERNS = [
-  /\b(cyberattack|intrusion detection|smart grid|charging station|charging control|generic enabler)\b/i,
-  /\b(tire-road|vehicle state and parameters|friction observer|twin-in-the-loop)\b/i,
-  /\b(superconductivity for solid state chemists|high-temperature superconductivity)\b/i,
-  /\b(direct air capture|dac plant|fuel cell polarization)\b/i,
-  /\b(neutrino experiment|solid detector)\b/i,
-  /\b(field-effect transistor|graphene fet|supercapacitor|electric-double-layer elements using cu\+)\b/i,
-];
+const STOPWORDS = new Set([
+  "the", "and", "for", "with", "from", "that", "this", "these", "those",
+  "what", "when", "where", "which", "who", "why", "how", "all", "any",
+  "both", "each", "few", "more", "most", "other", "some", "such", "than",
+  "too", "very", "can", "will", "just", "should", "now", "are", "were",
+  "been", "being", "have", "has", "had", "does", "did", "doing", "would",
+  "could", "into", "through", "during", "before", "after", "above", "below",
+  "latest", "recent", "study", "studies", "research", "findings", "review",
+  "overview", "paper", "papers", "journal", "analysis", "experimental",
+  "investigation", "approach", "advances", "advancements", "trends",
+  "future", "perspectives", "progress",
+]);
 
-// Required core concept stems for battery / electrolyte research
-const BATTERY_CORE_KEYWORDS = [
-  "electrolyte",
-  "solid-state",
-  "solid state",
-  "all-solid-state",
-  "ionic conduct",
-  "conductivity",
-  "argyrodite",
-  "garnet",
-  "llzo",
-  "nasicon",
-  "halide",
-  "polymer",
-  "interfacial",
-  "lithium",
-  "sodium",
-  "battery",
-  "anode",
-  "cathode",
-];
+function extractKeywords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .split(/\s+/)
+    .map((w) => w.trim())
+    .filter((w) => w.length >= 3 && !STOPWORDS.has(w) && !/^\d{4}$/.test(w));
+}
 
 export async function checkSourceRelevance(
   goal: string,
-  _taskQuery: string,
+  taskQuery: string,
   source: Source,
   _signal?: AbortSignal,
 ): Promise<boolean> {
-  const text = `${source.title} ${source.snippet || ""}`.toLowerCase();
+  const title = (source.title || "").toLowerCase();
+  const snippet = (source.snippet || "").toLowerCase();
+  const fullText = `${title} ${snippet}`;
 
-  // 1. Explicit reject filter for known noisy academic cross-matches
-  for (const pattern of REJECT_PATTERNS) {
-    if (pattern.test(source.title) || pattern.test(source.snippet || "")) {
-      return false;
-    }
-  }
-
-  // 2. Reject "Review for ..." peer-review comments metadata entries
-  if (/^review for\s*"/i.test(source.title)) {
+  // 1. Reject peer-review comments metadata entries
+  if (/^review for\s*"/i.test(title)) {
     return false;
   }
 
-  // 3. Goal-specific matching:
-  // If goal mentions "solid-state" or "solid state" and "electrolyte", source MUST match electrolyte concepts
-  const isSolidStateGoal = /solid[\s-]state/i.test(goal) && /electrolyte/i.test(goal);
-
-  if (isSolidStateGoal) {
-    const hasElectrolyte = /\b(electrolyte|solid-state|solid state|sse|assb|ionic conductivity|argyrodite|garnet|llzo|nasicon|halide|polymer)\b/i.test(text);
-    if (!hasElectrolyte) return false;
+  // 2. Reject empty title or snippet
+  if (!title.trim()) {
+    return false;
   }
 
-  // Count core keyword matches
-  let matchCount = 0;
-  for (const kw of BATTERY_CORE_KEYWORDS) {
-    if (text.includes(kw)) {
-      matchCount++;
+  // 3. Extract keywords from both the overall goal and the specific task query
+  const goalKeywords = extractKeywords(goal);
+  const queryKeywords = extractKeywords(taskQuery);
+  const allKeywords = Array.from(new Set([...goalKeywords, ...queryKeywords]));
+
+  // If query is too generic, allow source
+  if (allKeywords.length === 0) {
+    return true;
+  }
+
+  // 4. Check keyword overlap
+  let titleMatches = 0;
+  let totalMatches = 0;
+
+  for (const kw of allKeywords) {
+    if (title.includes(kw)) {
+      titleMatches++;
+      totalMatches++;
+    } else if (snippet.includes(kw)) {
+      totalMatches++;
     }
   }
 
-  return matchCount >= 2;
+  // Relevant if at least 1 keyword appears in the title,
+  // or at least 2 keywords appear in the combined content (or all if < 2)
+  if (titleMatches >= 1) {
+    return true;
+  }
+
+  const threshold = Math.min(2, allKeywords.length);
+  return totalMatches >= threshold;
 }
