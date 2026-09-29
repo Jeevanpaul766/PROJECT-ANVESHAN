@@ -259,7 +259,7 @@ export async function writeReport(
     "",
     "4. Use [n] inline citations from the source table below. Do NOT invent URLs.",
     "5. The ## Sources section must list every source using format: [n] Title [Venue] — URL (kind, year)",
-    "6. Return ONLY the Markdown, no code fences, no extra commentary.",
+    "6. Return ONLY the Markdown report. Do NOT write any preamble, scratchpad notes, or thought process. Start IMMEDIATELY with '## Executive summary'.",
     "",
     "Source index (use these [n] numbers):",
     ...sourceTableLines,
@@ -287,19 +287,23 @@ export async function writeReport(
           "You write exhaustive, deeply evidenced research reports in Markdown. " +
           "Adapt your analysis to the specific research domain. " +
           "Include quantitative data where available, identify contradictions and their root causes, and highlight open questions. " +
-          "Never fabricate URLs — only use the provided numbered sources.",
+          "Never fabricate URLs — only use the provided numbered sources. " +
+          "Do NOT output thinking or scratchpad notes. Start directly with the section headings.",
       },
       { role: "user", content: prompt },
     ],
-    { temperature: 0.2, signal, model: useModel, maxTokens: 2200 },
+    { temperature: 0.2, signal, model: useModel, maxTokens: 4096 },
   );
 
   if (!result.usedModel || !result.text.trim()) return offline;
 
   let report = result.text.trim();
 
-  // Ensure the report starts with the goal as H1
-  if (!report.startsWith("# ")) {
+  // If the model produced preamble reasoning before ## Executive summary, strip it cleanly
+  const execMatch = report.search(/^## Executive summary/m);
+  if (execMatch > 0) {
+    report = `# ${goal}\n\n` + report.slice(execMatch);
+  } else if (!report.startsWith("# ")) {
     report = `# ${goal}\n\n${report}`;
   }
 
