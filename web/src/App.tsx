@@ -167,7 +167,7 @@ export default function App() {
   const [snap, setSnap] = useState<SessionSnapshot | null>(null);
   const [events, setEvents] = useState<SessionEvent[]>([]);
   const [goal, setGoal] = useState("");
-  const [model, setModel] = useState("ollama:qwen2.5:14b");
+  const [model, setModel] = useState("ollama:qwen2.5:7b");
   const [panelTab, setPanelTab] = useState<"sources" | "critique" | "report">(
     "sources",
   );
@@ -493,16 +493,16 @@ export default function App() {
                       cursor: "pointer",
                     }}
                   >
-                    <optgroup label="⚡ Local Models (Ollama — Unlimited, No Rate Limits)">
-                      <option value="ollama:qwen2.5:14b">Qwen 2.5 14B (Local — Recommended)</option>
-                      <option value="ollama:qwen2.5:32b">Qwen 2.5 32B (Local — Deep Reasoning)</option>
-                      <option value="ollama:qwen2.5:7b">Qwen 2.5 7B (Local — Ultra Fast)</option>
+                    <optgroup label="⚡ Local Models (Ollama — Unlimited & Private)">
+                      <option value="ollama:qwen2.5:7b">Qwen 2.5 7B (Local — Lightweight & Quiet, Recommended)</option>
+                      <option value="ollama:qwen2.5:14b">Qwen 2.5 14B (Local — High Compute / Fan Ramped)</option>
+                      <option value="ollama:qwen2.5:32b">Qwen 2.5 32B (Local — Maximum Reasoning)</option>
                     </optgroup>
-                    <optgroup label="☁️ Cloud APIs (Multi-Provider)">
+                    <optgroup label="☁️ Cloud APIs (Zero Heat & Fast)">
                       <option value="cloud-router">Auto Cloud Waterfall (Gemini → Groq → OpenRouter)</option>
-                      <option value="groq:qwen/qwen3.6-27b">Groq (Qwen 3.6 27B Cloud)</option>
-                      <option value="gemini:gemini-3.6-flash">Google Gemini (Flash)</option>
-                      <option value="openrouter:nvidia/nemotron-3-super-120b-a12b:free">OpenRouter (Nemotron Super 120B)</option>
+                      <option value="groq:llama-3.3-70b-versatile">Groq Llama 3.3 70B (Fast & Cool)</option>
+                      <option value="gemini:gemini-2.0-flash">Google Gemini 2.0 Flash (Fast & Cool)</option>
+                      <option value="openrouter:nvidia/nemotron-3-super-120b-a12b:free">OpenRouter Nemotron Free</option>
                     </optgroup>
                   </select>
                   <button
