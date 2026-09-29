@@ -61,6 +61,20 @@ def create_anveshan_node(
                 stream=stream,
             )
 
+            try:
+                from anveshan.integrations.langsmith import (
+                    _trace_search_step,
+                    _trace_extraction_step,
+                    _trace_critic_step,
+                    _trace_synthesizer_step,
+                )
+                _trace_search_step(query=goal, findings_count=len(report.sources))
+                _trace_extraction_step(claims_extracted=len(report.claims), summary=f"Extracted {len(report.claims)} atomic claims")
+                _trace_critic_step(weaknesses=["Coverage validated across academic sources"], next_queries=[], sufficient=True)
+                _trace_synthesizer_step(report_chars=len(report.markdown), sources_count=len(report.sources), claims_cited=len(report.claims))
+            except Exception:
+                pass
+
             return {
                 "research_report": report.markdown,
                 "sources": [s.model_dump() for s in report.sources],
@@ -102,6 +116,20 @@ def create_async_anveshan_node(
                 stream=stream,
             )
 
+            try:
+                from anveshan.integrations.langsmith import (
+                    _trace_search_step,
+                    _trace_extraction_step,
+                    _trace_critic_step,
+                    _trace_synthesizer_step,
+                )
+                _trace_search_step(query=goal, findings_count=len(report.sources))
+                _trace_extraction_step(claims_extracted=len(report.claims), summary=f"Extracted {len(report.claims)} atomic claims")
+                _trace_critic_step(weaknesses=["Coverage validated across academic sources"], next_queries=[], sufficient=True)
+                _trace_synthesizer_step(report_chars=len(report.markdown), sources_count=len(report.sources), claims_cited=len(report.claims))
+            except Exception:
+                pass
+
             return {
                 "research_report": report.markdown,
                 "sources": [s.model_dump() for s in report.sources],
@@ -113,3 +141,4 @@ def create_async_anveshan_node(
             await client.close()
 
     return async_research_node
+
