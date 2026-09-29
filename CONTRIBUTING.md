@@ -2,14 +2,14 @@
 
 Thank you for your interest in contributing to **Project Anveshan** — an open Deep Research OS for long-horizon, sourced investigation.
 
-## The Module-by-Module Build Contract
+## Contribution Workflow
 
 Project Anveshan is engineered under a strict modular discipline:
 
-1. **Read `plans/BUILD.md` first**: This is the master index and dependency graph.
-2. **One module at a time**: Implement only the files and features designated for the current active module in `plans/modules/`.
-3. **Verify acceptance checks**: Every module has an `Acceptance checks` checklist. Never mark a module done until every check passes.
-4. **No premature features**: If a feature belongs in a later module, record it in that module's `Deferred` section rather than adding ad-hoc code now.
+1. **Focus on single subsystems**: Keep enhancements and bug fixes scoped to a single agent or engine subsystem.
+2. **Strict TypeScript & Contracts**: Ensure all domain types in `src/engine/types.ts` remain strictly typed and validated.
+3. **Verify acceptance checks**: Ensure all unit tests, probes, and typechecks pass before submitting changes.
+4. **No premature dependencies**: Avoid adding external dependencies unless strictly necessary for core functionality.
 
 ## Repository Layout
 
@@ -27,9 +27,8 @@ src/
 ├── scripts/             # Isolated verification probes for each subsystem
 └── tests/               # Automated unit and integration test suites
 web/                     # Local-first React + Vite research dashboard
-.dsh/skills/             # DeepSeek Harness skills integration
-docs/                    # Technical documentation and guides
-plans/                   # Architecture, build order, and module specs
+sdk/python/              # Production Python SDK, LangChain tools & LangGraph nodes
+docs/                    # Architecture, Agentic AI treatise, and visual assets
 ```
 
 ## Development Guidelines
